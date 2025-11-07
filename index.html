@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Chatbot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      color: #333;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #4CAF50;
+    }
+
+    textarea {
+      width: 80%;
+      height: 100px;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      resize: none;
+    }
+
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #45a049;
+    }
+
+    pre {
+      text-align: left;
+      background: #fff;
+      padding: 15px;
+      width: 80%;
+      margin: 20px auto;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Chatbot</h1>
+  <textarea id="question" placeholder="Type your question..."></textarea>
+  <button id="generateBtn">Generate Answer</button>
+  <pre id="answer"></pre>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    document.getElementById("generateBtn").addEventListener("click", async () => {
+      const question = document.getElementById("question").value;
+      const answerBox = document.getElementById("answer");
+
+      if (!question.trim()) {
+        answerBox.textContent = "⚠️ Please enter a question!";
+        return;
+      }
+
+      answerBox.textContent = "Loading...";
+
+      try {
+        // ✅ Call your backend instead of Google API directly
+        const response = await axios.post("/api/server", {
+          contents: [
+            { parts: [{ text: question }] }
+          ]
+        });
+
+
+
+        const text = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response received.";
+        answerBox.textContent = text;
+
+      } catch (error) {
+        console.error(error);
+        answerBox.textContent = "❌ Error fetching answer.";
+      }
+    });
+  </script>
+</body>
+
+</html>
