@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot</title>
+  <style>
+    html {
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      background-color: rgb(38, 38, 38);
+      padding: 0;
+      margin: 0;
+    }
+
+    .header {
+      background-color: rgb(90, 90, 90);
+      margin: 0;
+      padding: 10px;
+      box-shadow: 2px 2px 8px black;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 30px;
+    }
+
+    .answer {
+      color: white;
+      padding: 20px;
+      margin: 20px;
+      max-height: 70vh;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    .answer::-webkit-scrollbar {
+      display: none;
+      /* Chrome, Safari, Edge */
+    }
+
+    .inputbox {
+      position: fixed;
+      top: 90%;
+      width: 70%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+    }
+
+    @media (max-width:480px) {
+      .inputbox {
+        width: 100%;
+      }
+    }
+
+    .inputfield {
+      background-color: rgb(90, 90, 90);
+      color: white;
+      width: 70%;
+      max-height: 200px;
+      padding: 20px;
+      border-radius: 20px;
+    }
+
+    .Generate {
+      background-color: chartreuse;
+      color: black;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .loading{
+      position: fixed;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1000;
+      background-color: rgba(0, 0, 0, 0.629);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    <h1><i class="fa-solid fa-brain"></i></h1>
+  </div>
+
+  <div id="answer" class="answer"></div>
+
+  <div class="inputbox">
+    <textarea class="inputfield" name="" id="question" placeholder="enter your question here"></textarea>
+    <button id="generateBtn" class="Generate"><i class="fa-solid fa-brain"></i></button>
+  </div>
+
+  <div style="display: none;" id="loading" class="loading">
+    <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.5/dist/dotlottie-wc.js" type="module"></script>
+<dotlottie-wc src="https://lottie.host/10c9290d-cf87-42ef-929c-0e359be06b0d/ErILZTtmBO.lottie" style="width: 200px;height: 100px" autoplay loop></dotlottie-wc>
+  </div>
+
+  <!-- Axios -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.3/dist/purify.min.js"></script>
+
+<script>
+  function load() {
+    let loader = document.getElementById("loading");
+    loader.style.display = loader.style.display === "none" ? "flex" : "none";
+  }
+
+  document.getElementById("generateBtn").addEventListener("click", async () => {
+    const question = document.getElementById("question").value;
+    const answerBox = document.getElementById("answer");
+
+    if (!question.trim()) {
+      answerBox.textContent = "⚠️ Please enter a question!";
+      return;
+    }
+
+    load();
+
+    try {
+      const response = await axios.post("/api/server", {
+        contents: [{ parts: [{ text: question }] }]
+      });
+
+      const rawText =
+        response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response received.";
+
+      let htmlOutput = marked.parse(rawText);
+      htmlOutput = DOMPurify.sanitize(htmlOutput);
+
+      answerBox.innerHTML = htmlOutput;
+    } catch (error) {
+      console.error(error);
+      answerBox.textContent = "❌ Error fetching answer.";
+    }
+
+    load();
+  });
+</script>
+
+</body>
+
+</html>
